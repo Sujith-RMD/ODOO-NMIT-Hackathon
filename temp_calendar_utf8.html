@@ -1,0 +1,610 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dayflow ΓÇö Time Off</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F7FAFC;
+    --surface:#FFFFFF;
+    --nav:#14324A;
+    --text-primary:#1F2937;
+    --text-secondary:#64748B;
+    --border:#E2E8F0;
+    --primary:#2F80ED;
+    --primary-dim:#EAF2FE;
+    --success:#27AE60;
+    --success-dim:#E8F6ED;
+    --warning:#F2C94C;
+    --leave:#2F80ED;
+    --error:#EB5757;
+    --error-dim:#FDECEC;
+    --pending:#94A3B8;
+    --pending-dim:#F1F5F9;
+    --radius:14px;
+    --shadow:0 1px 2px rgba(20,50,74,0.04), 0 4px 16px rgba(20,50,74,0.06);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{ font-family:'Inter',sans-serif; background:var(--bg); color:var(--text-primary); }
+  h1,h2,h3,.brand{ font-family:'Manrope',sans-serif; }
+
+  /* Top nav */
+  .topnav{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 32px;
+    background:var(--surface);
+    border-bottom:1px solid var(--border);
+  }
+  .topnav-left{ display:flex; align-items:center; gap:34px; }
+  .brand{ font-size:19px; font-weight:800; color:var(--nav); }
+  .brand b{ color:var(--primary); }
+  .tabs{ display:flex; gap:26px; }
+  .tab{
+    font-size:14px; font-weight:600; color:var(--text-secondary);
+    text-decoration:none; cursor:pointer; padding-bottom:4px;
+    border-bottom:2px solid transparent;
+  }
+  .tab.active{ color:var(--primary); border-bottom-color:var(--primary); }
+  .topnav-right{ display:flex; align-items:center; gap:14px; }
+  .status-pill{
+    display:flex; align-items:center; gap:6px;
+    font-size:12.5px; font-weight:600; color:var(--text-secondary);
+    background:var(--bg); border:1px solid var(--border);
+    padding:7px 12px; border-radius:999px;
+  }
+  .status-pill .dot{ width:7px; height:7px; border-radius:50%; background:var(--error); }
+  .btn{
+    border:none; border-radius:10px; cursor:pointer;
+    font-family:'Inter',sans-serif; font-weight:700; font-size:13.5px;
+    transition:filter .15s ease, transform .05s ease;
+  }
+  .btn:hover{ filter:brightness(0.96); }
+  .btn:active{ transform:scale(0.98); }
+  .btn-primary{ background:var(--primary); color:#fff; padding:10px 18px; }
+  .btn-ghost{ background:transparent; color:var(--text-secondary); border:1px solid var(--border); padding:9px 14px; }
+  .avatar{
+    width:34px; height:34px; border-radius:50%;
+    background:linear-gradient(135deg,#2F80ED,#14324A);
+    color:#fff; display:flex; align-items:center; justify-content:center;
+    font-size:12.5px; font-weight:700; position:relative;
+  }
+  .avatar::after{
+    content:''; position:absolute; bottom:-1px; right:-1px;
+    width:9px; height:9px; border-radius:50%; background:var(--success);
+    border:2px solid var(--surface);
+  }
+
+  /* Page */
+  .page{ max-width:1180px; margin:0 auto; padding:32px 32px 60px; }
+  .page-head{ display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:24px; flex-wrap:wrap; gap:14px; }
+  .page-head h1{ font-size:26px; font-weight:800; }
+  .page-head p{ font-size:13.5px; color:var(--text-secondary); margin-top:4px; }
+
+  .stats-row{ display:flex; gap:12px; margin-bottom:22px; flex-wrap:wrap; }
+  .stat-pill{
+    display:flex; align-items:center; gap:9px;
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:12px; padding:12px 18px;
+    font-size:13.5px; color:var(--text-secondary); font-weight:600;
+  }
+  .stat-pill b{ font-size:16px; color:var(--text-primary); font-family:'Manrope',sans-serif; }
+  .stat-pill .dot{ width:8px; height:8px; border-radius:50%; }
+
+  .card{
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:var(--radius); box-shadow:var(--shadow);
+  }
+  .card-head{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:18px 22px; border-bottom:1px solid var(--border);
+  }
+  .card-head h3{ font-size:15.5px; font-weight:700; }
+
+  table{ width:100%; border-collapse:collapse; }
+  thead th{
+    text-align:left; font-size:11.5px; font-weight:700; color:var(--text-secondary);
+    text-transform:uppercase; letter-spacing:0.04em;
+    padding:12px 22px; border-bottom:1px solid var(--border);
+  }
+  tbody td{ padding:15px 22px; font-size:13.5px; border-bottom:1px solid var(--border); vertical-align:middle; }
+  tbody tr:last-child td{ border-bottom:none; }
+  .type-dot{ display:inline-flex; align-items:center; gap:7px; font-weight:600; }
+  .type-dot .pip{ width:7px; height:7px; border-radius:50%; }
+  .muted{ color:var(--text-secondary); }
+  .badge{ font-size:11px; font-weight:700; padding:4px 11px; border-radius:999px; }
+  .badge.approved{ background:var(--success-dim); color:var(--success); }
+  .badge.pending{ background:var(--pending-dim); color:var(--pending); }
+  .badge.rejected{ background:var(--error-dim); color:var(--error); }
+
+  .empty-row td{ text-align:center; color:var(--text-secondary); padding:36px 22px; font-size:13.5px; }
+
+  /* Modal */
+  .overlay{
+    position:fixed; inset:0; background:rgba(20,50,74,0.45);
+    display:none; align-items:center; justify-content:center; z-index:50;
+    padding:20px;
+    opacity:0; transition:opacity .15s ease;
+  }
+  .overlay.show{ display:flex; opacity:1; }
+  .modal{
+    background:var(--surface); border-radius:18px; width:100%; max-width:420px;
+    box-shadow:0 20px 60px rgba(20,50,74,0.25);
+    overflow:hidden;
+    transform:scale(0.97); transition:transform .18s ease;
+  }
+  .overlay.show .modal{ transform:scale(1); }
+  .modal-head{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:18px 22px; border-bottom:1px solid var(--border);
+  }
+  .modal-head h3{ font-size:15.5px; font-weight:700; }
+  .step-dots{ display:flex; gap:6px; }
+  .step-dots span{ width:6px; height:6px; border-radius:50%; background:var(--border); }
+  .step-dots span.active{ background:var(--primary); width:16px; border-radius:4px; }
+  .close-btn{
+    width:28px; height:28px; border-radius:8px; border:none; background:var(--bg);
+    color:var(--text-secondary); font-size:15px; cursor:pointer;
+  }
+  .modal-body{ padding:20px 22px 22px; }
+  #step1, #step2{ transition:opacity .18s ease, transform .18s ease; }
+  #step1.leaving, #step2.leaving{ opacity:0; transform:translateX(-8px); }
+  #step1.entering, #step2.entering{ opacity:0; transform:translateX(8px); }
+
+  .selection-note b{ display:inline-block; transition:transform .15s ease; }
+  .selection-note b.bump{ transform:scale(1.25); }
+
+  /* Calendar */
+  .cal-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+  .cal-head .month{ font-size:14.5px; font-weight:700; }
+  .cal-nav{ display:flex; gap:6px; }
+  .cal-nav button{
+    width:28px; height:28px; border-radius:8px; border:1px solid var(--border);
+    background:var(--surface); cursor:pointer; color:var(--text-secondary); font-size:13px;
+  }
+  .cal-dow{ display:grid; grid-template-columns:repeat(7,1fr); margin-bottom:6px; }
+  .cal-dow span{ text-align:center; font-size:10.5px; font-weight:700; color:var(--text-secondary); text-transform:uppercase; }
+  .cal-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:0; }
+  .cal-day{
+    aspect-ratio:1; display:flex; align-items:center; justify-content:center;
+    font-size:13px; font-weight:500; cursor:pointer;
+    color:var(--text-primary); background:transparent;
+    user-select:none; border:1px solid transparent;
+    margin:2px 0;
+    transition:background-color .18s ease, color .18s ease, border-radius .18s ease, transform .12s ease;
+  }
+  .cal-day.disabled{ color:#CBD5E1; cursor:not-allowed; }
+  .cal-day.blank{ visibility:hidden; }
+  .cal-day:not(.disabled):not(.blank):not(.range-start):not(.range-end):not(.range-middle):hover{
+    background:var(--primary-dim); border-radius:9px;
+  }
+
+  /* Continuous range bar */
+  .cal-day.range-middle{ background:var(--primary-dim); border-radius:0; }
+  .cal-day.range-start{ background:var(--primary); color:#fff; font-weight:700; border-radius:9px 0 0 9px; }
+  .cal-day.range-end{ background:var(--primary); color:#fff; font-weight:700; border-radius:0 9px 9px 0; }
+  .cal-day.range-single{ background:var(--primary); color:#fff; font-weight:700; border-radius:9px; }
+  .cal-day.range-start, .cal-day.range-end, .cal-day.range-single{ transform:scale(1.06); }
+  .cal-day.weekend-excluded{
+    color:var(--text-secondary);
+    text-decoration:line-through; text-decoration-color:var(--pending); text-decoration-thickness:1.5px;
+  }
+  .cal-day.today:not(.range-start):not(.range-end):not(.range-single){ border-color:var(--primary); border-radius:9px; font-weight:700; }
+
+  /* Live hover preview before the range is confirmed */
+  .cal-day.preview-middle{ background:#F0F6FE; border-radius:0; }
+  .cal-day.preview-end{ background:var(--primary-dim); color:var(--primary); font-weight:700; border-radius:0 9px 9px 0; }
+  .cal-day.preview-start{ background:var(--primary); color:#fff; font-weight:700; border-radius:9px 0 0 9px; opacity:0.85; }
+
+  .selection-note{
+    margin-top:14px; font-size:12.5px; color:var(--text-secondary);
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .selection-note b{ color:var(--text-primary); }
+  .selection-hint{ font-size:11.5px; color:var(--text-secondary); margin-top:8px; }
+
+  .form-group{ margin-bottom:14px; }
+  .form-group label{ display:block; font-size:12.5px; font-weight:700; color:var(--text-secondary); margin-bottom:6px; }
+  select, textarea{
+    width:100%; border:1px solid var(--border); border-radius:10px;
+    padding:10px 12px; font-size:13.5px; font-family:'Inter',sans-serif; color:var(--text-primary);
+    background:var(--surface); resize:none;
+  }
+  select:focus, textarea:focus{ outline:none; border-color:var(--primary); }
+  textarea{ min-height:74px; }
+
+  .day-chips{ display:flex; flex-wrap:wrap; gap:6px; margin-bottom:16px; }
+  .day-chip{
+    font-size:12px; font-weight:600; background:var(--primary-dim); color:var(--primary);
+    padding:5px 10px; border-radius:8px;
+  }
+
+  .modal-actions{ display:flex; gap:10px; margin-top:6px; }
+  .modal-actions .btn{ flex:1; padding:11px; }
+  .btn-secondary{ background:var(--bg); color:var(--text-primary); border:1px solid var(--border); }
+  .btn-primary:disabled{ background:#B8D3F8; cursor:not-allowed; }
+</style>
+</head>
+<body>
+
+  <nav class="topnav">
+    <div class="topnav-left">
+      <div class="brand">Day<b>flow</b></div>
+      <div class="tabs">
+        <a class="tab">Employees</a>
+        <a class="tab">Attendance</a>
+        <a class="tab active">Time Off</a>
+      </div>
+    </div>
+    <div class="topnav-right">
+      <button class="btn btn-primary">Check In ΓåÆ</button>
+      <div class="status-pill"><span class="dot"></span>Offline</div>
+      <div class="avatar">OI</div>
+    </div>
+  </nav>
+
+  <div class="page">
+    <div class="page-head">
+      <div>
+        <h1>Time Off</h1>
+        <p>Apply for leave and track the status of your requests.</p>
+      </div>
+      <button class="btn btn-primary" id="openModalBtn">+ Apply Leave</button>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-pill"><span class="dot" style="background:var(--pending)"></span><b id="pendingCount">1</b> Pending</div>
+      <div class="stat-pill"><span class="dot" style="background:var(--success)"></span><b id="approvedCount">0</b> Approved</div>
+      <div class="stat-pill"><span class="dot" style="background:var(--error)"></span><b id="rejectedCount">0</b> Rejected</div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h3>My Leave Requests</h3></div>
+      <table>
+        <thead>
+          <tr>
+            <th>Type</th><th>Period</th><th>Days</th><th>Reason</th><th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="leaveTableBody">
+          <tr>
+            <td><span class="type-dot"><span class="pip" style="background:var(--error)"></span>Sick Leave</span></td>
+            <td>Dec 01, 2024 ΓÇô Dec 02, 2024</td>
+            <td>2d</td>
+            <td class="muted">Fever, resting at home</td>
+            <td><span class="badge pending">Pending</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div class="overlay" id="overlay">
+    <div class="modal">
+      <div class="modal-head">
+        <h3 id="modalTitle">Select leave days</h3>
+        <div style="display:flex; align-items:center; gap:12px;">
+          <div class="step-dots"><span class="active" id="dot1"></span><span id="dot2"></span></div>
+          <button class="close-btn" id="closeModalBtn">Γ£ò</button>
+        </div>
+      </div>
+      <div class="modal-body">
+
+        <!-- Step 1: calendar -->
+        <div id="step1">
+          <div class="cal-head">
+            <div class="cal-nav"><button id="prevMonth">ΓÇ╣</button></div>
+            <div class="month" id="monthLabel"></div>
+            <div class="cal-nav"><button id="nextMonth">ΓÇ║</button></div>
+          </div>
+          <div class="cal-dow">
+            <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
+          </div>
+          <div class="cal-grid" id="calGrid"></div>
+          <div class="selection-note"><span id="stepHint">Click your first leave day</span><span><b id="selCount">0</b> working days</span></div>
+          <div class="selection-hint" id="weekendNote"></div>
+          <div class="modal-actions">
+            <button class="btn btn-secondary" id="cancelStep1">Cancel</button>
+            <button class="btn btn-primary" id="toStep2" disabled>Next ΓåÆ</button>
+          </div>
+        </div>
+
+        <!-- Step 2: reason -->
+        <div id="step2" style="display:none;">
+          <div class="day-chips" id="dayChips"></div>
+          <div class="form-group">
+            <label>Leave type</label>
+            <select id="leaveType">
+              <option>Paid Leave</option>
+              <option>Sick Leave</option>
+              <option>Unpaid Leave</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Reason</label>
+            <textarea id="reasonInput" placeholder="Briefly describe the reason for leave"></textarea>
+          </div>
+          <div class="modal-actions">
+            <button class="btn btn-secondary" id="backStep1">ΓåÉ Back</button>
+            <button class="btn btn-primary" id="submitLeave">Submit Request</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+<script>
+  const overlay = document.getElementById('overlay');
+  const openBtn = document.getElementById('openModalBtn');
+  const closeBtn = document.getElementById('closeModalBtn');
+  const step1 = document.getElementById('step1');
+  const step2 = document.getElementById('step2');
+  const dot1 = document.getElementById('dot1');
+  const dot2 = document.getElementById('dot2');
+  const modalTitle = document.getElementById('modalTitle');
+
+  let current = new Date();
+  current.setDate(1);
+  let selectedDates = new Set(); // working days only, "YYYY-MM-DD"
+  let rangeStart = null;   // Date
+  let rangeEnd = null;     // Date
+  let lastPreviewKey = null; // avoids re-rendering when hovering the same day repeatedly
+  let weekendDates = new Set(); // weekend days within range, for the strike-through display
+
+  const monthLabel = document.getElementById('monthLabel');
+  const calGrid = document.getElementById('calGrid');
+  const selCount = document.getElementById('selCount');
+  const toStep2Btn = document.getElementById('toStep2');
+  const stepHint = document.getElementById('stepHint');
+  const weekendNote = document.getElementById('weekendNote');
+
+  const monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+
+  function fmt(y,m,d){
+    return `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+  }
+  function keyOf(date){ return fmt(date.getFullYear(), date.getMonth(), date.getDate()); }
+  function isWeekend(date){ const day = date.getDay(); return day === 0 || day === 6; }
+  function stripTime(date){ const d = new Date(date); d.setHours(0,0,0,0); return d; }
+
+  function computeRange(start, end){
+    selectedDates.clear();
+    weekendDates.clear();
+    let from = start <= end ? start : end;
+    let to = start <= end ? end : start;
+    let cursor = new Date(from);
+    while(cursor <= to){
+      const key = keyOf(cursor);
+      if(isWeekend(cursor)){ weekendDates.add(key); }
+      else { selectedDates.add(key); }
+      cursor.setDate(cursor.getDate()+1);
+    }
+  }
+
+  function renderCalendar(){
+    const y = current.getFullYear();
+    const m = current.getMonth();
+    monthLabel.textContent = `${monthNames[m]} ${y}`;
+    calGrid.innerHTML = '';
+    const firstDay = new Date(y,m,1).getDay();
+    const daysInMonth = new Date(y,m+1,0).getDate();
+    const today = new Date(); today.setHours(0,0,0,0);
+
+    for(let i=0;i<firstDay;i++){
+      const blank = document.createElement('div');
+      blank.className = 'cal-day blank';
+      calGrid.appendChild(blank);
+    }
+    for(let d=1; d<=daysInMonth; d++){
+      const cell = document.createElement('div');
+      cell.className = 'cal-day';
+      cell.textContent = d;
+      const cellDate = new Date(y,m,d);
+      const key = fmt(y,m,d);
+      cell.dataset.key = key;
+      if(cellDate < today){ cell.classList.add('disabled'); }
+      if(cellDate.getTime() === today.getTime()){ cell.classList.add('today'); }
+
+      if(rangeStart && !rangeEnd){
+        // only the anchor day is picked so far
+        if(key === keyOf(rangeStart)) cell.classList.add('range-single');
+      } else if(rangeStart && rangeEnd){
+        const from = rangeStart <= rangeEnd ? rangeStart : rangeEnd;
+        const to = rangeStart <= rangeEnd ? rangeEnd : rangeStart;
+        if(cellDate >= stripTime(from) && cellDate <= stripTime(to)){
+          if(key === keyOf(from) && key === keyOf(to)) cell.classList.add('range-single');
+          else if(key === keyOf(from)) cell.classList.add('range-start');
+          else if(key === keyOf(to)) cell.classList.add('range-end');
+          else cell.classList.add('range-middle');
+          if(weekendDates.has(key)) cell.classList.add('weekend-excluded');
+        }
+      }
+
+      if(!cell.classList.contains('disabled')){
+        cell.addEventListener('click', () => onDayClick(cellDate));
+        if(rangeStart && !rangeEnd){
+          cell.addEventListener('mouseenter', () => applyPreview(key));
+        }
+      }
+      calGrid.appendChild(cell);
+    }
+    lastPreviewKey = null;
+  }
+
+  function applyPreview(hoverKey){
+    if(hoverKey === lastPreviewKey) return;
+    lastPreviewKey = hoverKey;
+    const hoverDate = new Date(hoverKey + 'T00:00:00');
+    const from = rangeStart <= hoverDate ? rangeStart : hoverDate;
+    const to = rangeStart <= hoverDate ? hoverDate : rangeStart;
+    Array.from(calGrid.children).forEach(cell => {
+      cell.classList.remove('preview-start','preview-middle','preview-end');
+      const key = cell.dataset.key;
+      if(!key || cell.classList.contains('disabled') || cell.classList.contains('range-single')) return;
+      const cellDate = new Date(key + 'T00:00:00');
+      if(cellDate >= stripTime(from) && cellDate <= stripTime(to)){
+        if(key === keyOf(from)) cell.classList.add('preview-start');
+        else if(key === keyOf(to)) cell.classList.add('preview-end');
+        else cell.classList.add('preview-middle');
+      }
+    });
+  }
+
+  function clearPreview(){
+    lastPreviewKey = null;
+    Array.from(calGrid.children).forEach(cell => {
+      cell.classList.remove('preview-start','preview-middle','preview-end');
+    });
+  }
+
+  function onDayClick(date){
+    if(!rangeStart || (rangeStart && rangeEnd)){
+      // start a fresh range
+      rangeStart = date;
+      rangeEnd = null;
+      selectedDates.clear();
+      weekendDates.clear();
+      stepHint.textContent = 'Now click your last leave day';
+    } else {
+      // second click completes the range
+      rangeEnd = date;
+      computeRange(rangeStart, rangeEnd);
+      stepHint.textContent = 'Click any day to start a new range';
+    }
+    renderCalendar();
+    updateSelCount();
+  }
+
+  function updateSelCount(){
+    const prev = parseInt(selCount.textContent) || 0;
+    selCount.textContent = selectedDates.size;
+    if(selectedDates.size !== prev){
+      selCount.classList.remove('bump');
+      void selCount.offsetWidth; // restart animation
+      selCount.classList.add('bump');
+    }
+    toStep2Btn.disabled = selectedDates.size === 0;
+    weekendNote.textContent = weekendDates.size > 0
+      ? `${weekendDates.size} weekend day${weekendDates.size > 1 ? 's' : ''} in this range won't be counted.`
+      : '';
+  }
+
+  document.getElementById('prevMonth').addEventListener('click', () => {
+    current.setMonth(current.getMonth()-1);
+    renderCalendar();
+  });
+  document.getElementById('nextMonth').addEventListener('click', () => {
+    current.setMonth(current.getMonth()+1);
+    renderCalendar();
+  });
+
+  function openModal(){
+    overlay.style.display = 'flex';
+    requestAnimationFrame(() => overlay.classList.add('show'));
+    rangeStart = null;
+    rangeEnd = null;
+    lastPreviewKey = null;
+    selectedDates.clear();
+    weekendDates.clear();
+    stepHint.textContent = 'Click your first leave day';
+    goToStep(1);
+    renderCalendar();
+    updateSelCount();
+  }
+  function closeModal(){
+    overlay.classList.remove('show');
+    setTimeout(() => { overlay.style.display = 'none'; }, 150);
+    rangeStart = null;
+    rangeEnd = null;
+    lastPreviewKey = null;
+    selectedDates.clear();
+    weekendDates.clear();
+    document.getElementById('reasonInput').value = '';
+  }
+
+  calGrid.addEventListener('mouseleave', () => {
+    if(rangeStart && !rangeEnd) clearPreview();
+  });
+
+  openBtn.addEventListener('click', openModal);
+  closeBtn.addEventListener('click', closeModal);
+  overlay.addEventListener('click', (e) => { if(e.target === overlay) closeModal(); });
+  document.getElementById('cancelStep1').addEventListener('click', closeModal);
+
+  function goToStep(n){
+    const showing = n === 1 ? step1 : step2;
+    const hiding = n === 1 ? step2 : step1;
+
+    hiding.classList.add('leaving');
+    setTimeout(() => {
+      hiding.style.display = 'none';
+      hiding.classList.remove('leaving');
+
+      showing.style.display = 'block';
+      showing.classList.add('entering');
+      void showing.offsetWidth; // force reflow so the transition runs
+      showing.classList.remove('entering');
+    }, 140);
+
+    if(n === 1){
+      dot1.classList.add('active'); dot2.classList.remove('active');
+      modalTitle.textContent = 'Select leave days';
+    } else {
+      dot1.classList.remove('active'); dot2.classList.add('active');
+      modalTitle.textContent = 'Confirm details';
+      renderChips();
+    }
+  }
+
+  function renderChips(){
+    const chipsWrap = document.getElementById('dayChips');
+    chipsWrap.innerHTML = '';
+    const sorted = Array.from(selectedDates).sort();
+    sorted.forEach(key => {
+      const d = new Date(key + 'T00:00:00');
+      const chip = document.createElement('span');
+      chip.className = 'day-chip';
+      chip.textContent = d.toLocaleDateString('en-US', {month:'short', day:'numeric'});
+      chipsWrap.appendChild(chip);
+    });
+  }
+
+  document.getElementById('toStep2').addEventListener('click', () => goToStep(2));
+  document.getElementById('backStep1').addEventListener('click', () => goToStep(1));
+
+  document.getElementById('submitLeave').addEventListener('click', () => {
+    const type = document.getElementById('leaveType').value;
+    const reason = document.getElementById('reasonInput').value.trim() || 'ΓÇö';
+    const sorted = Array.from(selectedDates).sort();
+    const first = new Date(sorted[0] + 'T00:00:00');
+    const last = new Date(sorted[sorted.length-1] + 'T00:00:00');
+    const opts = {month:'short', day:'2-digit', year:'numeric'};
+    const period = sorted.length === 1
+      ? first.toLocaleDateString('en-US', opts)
+      : `${first.toLocaleDateString('en-US', opts)} ΓÇô ${last.toLocaleDateString('en-US', opts)}`;
+
+    const dotColor = type === 'Sick Leave' ? 'var(--error)' : type === 'Unpaid Leave' ? 'var(--pending)' : 'var(--leave)';
+
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td><span class="type-dot"><span class="pip" style="background:${dotColor}"></span>${type}</span></td>
+      <td>${period}</td>
+      <td>${sorted.length}d</td>
+      <td class="muted">${reason}</td>
+      <td><span class="badge pending">Pending</span></td>
+    `;
+    document.getElementById('leaveTableBody').prepend(row);
+
+    const pendingEl = document.getElementById('pendingCount');
+    pendingEl.textContent = parseInt(pendingEl.textContent) + 1;
+
+    closeModal();
+  });
+</script>
+
+</body>
+</html>

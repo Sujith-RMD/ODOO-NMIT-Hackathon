@@ -23,11 +23,6 @@ export function EmployeesPage() {
 
   const employees = data?.items || [];
 
-  const handleAddEmployee = () => {
-    // In a real app, open a modal or navigate to /employees/new
-    alert("Add employee flow out of scope for hackathon (unless via API)");
-  };
-
   return (
     <div className="w-full">
       <div className="mb-8">
@@ -38,7 +33,6 @@ export function EmployeesPage() {
       <EmployeeSearchBar 
         searchTerm={searchTerm} 
         onSearchChange={setSearchTerm} 
-        onAddClick={handleAddEmployee} 
       />
       
       <EmployeeGrid employees={employees} isLoading={isLoading} />

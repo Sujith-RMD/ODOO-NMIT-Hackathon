@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Search, Plus } from 'lucide-react';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
@@ -7,10 +8,9 @@ import { useAuthStore } from '../../store/authStore';
 interface EmployeeSearchBarProps {
   searchTerm: string;
   onSearchChange: (value: string) => void;
-  onAddClick?: () => void;
 }
 
-export function EmployeeSearchBar({ searchTerm, onSearchChange, onAddClick }: EmployeeSearchBarProps) {
+export function EmployeeSearchBar({ searchTerm, onSearchChange }: EmployeeSearchBarProps) {
   const { user } = useAuthStore();
   const isAdmin = user?.role === 'admin';
 
@@ -30,9 +30,11 @@ export function EmployeeSearchBar({ searchTerm, onSearchChange, onAddClick }: Em
       </div>
       
       {isAdmin && (
-        <Button onClick={onAddClick} className="w-full sm:w-auto h-10 px-5" variant="default">
-          <Plus className="mr-2 h-4 w-4" />
-          New Employee
+        <Button asChild className="w-full sm:w-auto h-10 px-5 shadow-sm transition-transform hover:scale-[1.02]" variant="default">
+          <Link to="/employees/new">
+            <Plus className="mr-2 h-4 w-4" />
+            New Employee
+          </Link>
         </Button>
       )}
     </div>
