@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dayflow — Sign in</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F7FAFC;
+    --card:#FFFFFF;
+    --navy:#14324A;
+    --text:#1F2937;
+    --text-2:#64748B;
+    --border:#E2E8F0;
+    --primary:#2F80ED;
+    --primary-hover:#2569c9;
+    --error:#EB5757;
+    --eye:#64748B;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%;}
+  body{
+    font-family:'Inter', sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:32px;
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.001ms !important; transition-duration:0.001ms !important;}
+  }
+
+  .card{
+    width:100%;
+    max-width:420px;
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:32px 30px;
+    box-shadow:0 1px 3px rgba(20,50,74,0.06);
+  }
+
+  .logo-box{
+    text-align:center;
+    font-size:26px;
+    font-weight:600;
+    margin-bottom:32px;
+    letter-spacing:-0.01em;
+    color:var(--navy);
+  }
+  .logo-box span{ color:var(--primary); }
+
+  form{ display:none; flex-direction:column; gap:20px; }
+  form.active{ display:flex; }
+
+  .field{ display:flex; flex-direction:column; gap:8px; position:relative; }
+  .field label{
+    font-size:14px;
+    color:var(--text);
+  }
+
+  .boxed input{
+    font-family:'Inter', sans-serif;
+    font-size:14px;
+    padding:11px 12px;
+    border:1px solid var(--border);
+    border-radius:6px;
+    background:var(--card);
+    color:var(--text);
+    outline:none;
+    transition:border-color 0.2s, box-shadow 0.2s;
+    width:100%;
+  }
+  .boxed input:focus{ border-color:var(--primary); box-shadow:0 0 0 3px rgba(47,128,237,0.12); }
+
+  .underline-row{
+    display:flex;
+    align-items:center;
+    gap:14px;
+  }
+  .underline-row label{
+    width:130px;
+    flex-shrink:0;
+    font-size:14px;
+  }
+  .underline-row .underline-wrap{
+    flex:1;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    border-bottom:1px solid var(--border);
+    padding-bottom:6px;
+    position:relative;
+  }
+  .underline-row .underline-wrap:focus-within{ border-color:var(--primary); }
+  .underline-row input{
+    font-family:'Inter', sans-serif;
+    font-size:14px;
+    border:none;
+    background:transparent;
+    color:var(--text);
+    outline:none;
+    width:100%;
+  }
+
+  .eye-btn{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:6px;
+    width:30px;
+    height:26px;
+    cursor:pointer;
+    color:var(--eye);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:0;
+    flex-shrink:0;
+  }
+  .eye-btn svg{ width:16px; height:16px; }
+
+  .upload-btn{
+    width:32px;
+    height:32px;
+    border-radius:50%;
+    background:var(--primary);
+    border:none;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-shrink:0;
+    color:#fff;
+    transition:background 0.2s, transform 0.15s, box-shadow 0.15s;
+    position:relative;
+  }
+  .upload-btn:hover{ background:var(--primary-hover); }
+  .upload-btn.drag-over{ transform:scale(1.08); box-shadow:0 0 0 4px rgba(47,128,237,0.18); }
+  .upload-btn svg{ width:16px; height:16px; pointer-events:none; }
+  .upload-btn.has-image{ background:var(--border); overflow:hidden; }
+  .upload-btn.has-image img{ width:100%; height:100%; object-fit:cover; border-radius:50%; pointer-events:none; }
+  .upload-btn input[type=file]{
+    position:absolute;
+    inset:0;
+    opacity:0;
+    cursor:pointer;
+  }
+  .upload-hint{
+    font-size:10.5px;
+    color:var(--text-2);
+    margin-top:-8px;
+  }
+
+  .msg{
+    font-size:11.5px;
+    color:var(--error);
+    min-height:14px;
+  }
+
+  .submit{
+    margin-top:6px;
+    background:var(--primary);
+    color:#fff;
+    border:none;
+    border-radius:6px;
+    padding:12px;
+    font-size:13.5px;
+    font-weight:600;
+    letter-spacing:0.02em;
+    cursor:pointer;
+    transition:background 0.2s, transform 0.15s;
+  }
+  .submit:hover{ background:var(--primary-hover); }
+  .submit:active{ transform:scale(0.99); }
+  .submit:disabled{ opacity:0.6; cursor:default; }
+
+  .switch-line{
+    margin-top:18px;
+    font-size:12.5px;
+    color:var(--text-2);
+    text-align:center;
+  }
+  .switch-line button{
+    background:none;
+    border:none;
+    color:var(--primary);
+    cursor:pointer;
+    text-decoration:underline;
+    text-underline-offset:2px;
+    font-size:12.5px;
+    font-family:inherit;
+    padding:0;
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="logo-box">Day<span>Flow</span></div>
+
+  <!-- SIGN IN -->
+  <form id="form-signin" class="active">
+    <div class="field boxed" id="f-si-email">
+      <label for="si-email">Login Id/Email :-</label>
+      <input type="email" id="si-email" autocomplete="username">
+      <div class="msg"></div>
+    </div>
+    <div class="field boxed" id="f-si-password">
+      <label for="si-password">Password :-</label>
+      <input type="password" id="si-password" autocomplete="current-password">
+      <div class="msg"></div>
+    </div>
+    <button type="submit" class="submit">Sign in</button>
+    <div class="switch-line">Don't have an account? <button type="button" data-goto="signup">Sign Up</button></div>
+  </form>
+
+  <!-- SIGN UP -->
+  <form id="form-signup">
+    <div class="underline-row" id="f-su-company">
+      <label for="su-company">Company Name :-</label>
+      <div class="underline-wrap">
+        <input type="text" id="su-company">
+        <button type="button" class="upload-btn" id="upload-btn" title="Click or drag an image to upload your logo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"></path><path d="M5 12l7-7 7 7"></path></svg>
+          <input type="file" id="su-logo" accept="image/*">
+        </button>
+      </div>
+    </div>
+    <div class="underline-row" id="f-su-name">
+      <label for="su-name">Name :-</label>
+      <div class="underline-wrap"><input type="text" id="su-name"></div>
+    </div>
+    <div class="underline-row" id="f-su-email">
+      <label for="su-email">Email :-</label>
+      <div class="underline-wrap"><input type="email" id="su-email"></div>
+    </div>
+    <div class="underline-row" id="f-su-phone">
+      <label for="su-phone">Phone :-</label>
+      <div class="underline-wrap"><input type="tel" id="su-phone"></div>
+    </div>
+    <div class="underline-row" id="f-su-password">
+      <label for="su-password">Password :-</label>
+      <div class="underline-wrap">
+        <input type="password" id="su-password">
+        <button type="button" class="eye-btn" data-target="su-password">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+        </button>
+      </div>
+    </div>
+    <div class="underline-row" id="f-su-confirm">
+      <label for="su-confirm">Confirm Password :-</label>
+      <div class="underline-wrap">
+        <input type="password" id="su-confirm">
+        <button type="button" class="eye-btn" data-target="su-confirm">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+        </button>
+      </div>
+    </div>
+    <div class="msg" id="su-general-msg" style="text-align:center;"></div>
+    <button type="submit" class="submit">Sign Up</button>
+    <div class="switch-line">Already have an account? <button type="button" data-goto="signin">Sign In</button></div>
+  </form>
+</div>
+
+<script>
+  const forms = { signin: document.getElementById('form-signin'), signup: document.getElementById('form-signup') };
+
+  function goTo(name){
+    Object.keys(forms).forEach(k=> forms[k].classList.toggle('active', k===name));
+  }
+  document.querySelectorAll('[data-goto]').forEach(btn=>{
+    btn.addEventListener('click', ()=>goTo(btn.dataset.goto));
+  });
+
+  document.querySelectorAll('.eye-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const input = document.getElementById(btn.dataset.target);
+      input.type = input.type === 'password' ? 'text' : 'password';
+    });
+  });
+
+  const uploadBtn = document.getElementById('upload-btn');
+  const logoInput = document.getElementById('su-logo');
+
+  function setLogoPreview(src){
+    uploadBtn.classList.add('has-image');
+    uploadBtn.innerHTML = `<img src="${src}" alt="Logo preview"><input type="file" id="su-logo" accept="image/*">`;
+    attachFileListener();
+  }
+
+  function loadFile(file){
+    if(!file || !file.type.startsWith('image/')) return;
+    const reader = new FileReader();
+    reader.onload = (e)=> setLogoPreview(e.target.result);
+    reader.readAsDataURL(file);
+  }
+
+  function attachFileListener(){
+    document.getElementById('su-logo').addEventListener('change', (e)=> loadFile(e.target.files[0]));
+  }
+  attachFileListener();
+
+  ['dragover','dragenter'].forEach(evt=>{
+    uploadBtn.addEventListener(evt, (e)=>{ e.preventDefault(); uploadBtn.classList.add('drag-over'); });
+  });
+  ['dragleave','drop'].forEach(evt=>{
+    uploadBtn.addEventListener(evt, (e)=>{ e.preventDefault(); uploadBtn.classList.remove('drag-over'); });
+  });
+  uploadBtn.addEventListener('drop', (e)=>{
+    const file = e.dataTransfer.files[0];
+    loadFile(file);
+  });
+
+  function setError(fieldId, message){
+    const field = document.getElementById(fieldId);
+    field.querySelector('.msg')?.remove();
+    if(message){
+      const msg = document.createElement('div');
+      msg.className = 'msg';
+      msg.textContent = message;
+      field.appendChild(msg);
+    }
+  }
+
+  document.getElementById('form-signin').addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    let ok = true;
+    const email = document.getElementById('si-email').value.trim();
+    const pass = document.getElementById('si-password').value;
+    if(!email || !email.includes('@')){ setError('f-si-email','Enter a valid email address.'); ok=false; } else setError('f-si-email','');
+    if(!pass){ setError('f-si-password','Enter your password.'); ok=false; } else setError('f-si-password','');
+    if(!ok) return;
+
+    const btn = e.target.querySelector('.submit');
+    btn.textContent = 'Signing in…'; btn.disabled = true;
+    try{
+      const res = await fetch('/api/login', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ email, password: pass })
+      });
+      const data = await res.json();
+      if(!res.ok){ setError('f-si-password', data.error || 'Sign in failed.'); }
+      else{ alert('Signed in! Role: ' + data.role); }
+    }catch(err){
+      setError('f-si-password','Could not reach the server. Is it running?');
+    }finally{
+      btn.textContent = 'Sign in'; btn.disabled = false;
+    }
+  });
+
+  document.getElementById('form-signup').addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    let ok = true;
+    const company = document.getElementById('su-company').value.trim();
+    const name = document.getElementById('su-name').value.trim();
+    const email = document.getElementById('su-email').value.trim();
+    const phone = document.getElementById('su-phone').value.trim();
+    const pass = document.getElementById('su-password').value;
+    const confirm = document.getElementById('su-confirm').value;
+    const generalMsg = document.getElementById('su-general-msg');
+    generalMsg.textContent = '';
+
+    if(!company){ ok=false; }
+    if(!name){ ok=false; }
+    if(!email || !email.includes('@')){ ok=false; }
+    if(!pass || pass.length < 8){ ok=false; }
+    if(pass !== confirm){ generalMsg.textContent = 'Passwords do not match.'; ok=false; }
+    if(!ok){ if(!generalMsg.textContent) generalMsg.textContent = 'Please fill in all fields correctly.'; return; }
+
+    const btn = e.target.querySelector('.submit');
+    btn.textContent = 'Creating…'; btn.disabled = true;
+    try{
+      const res = await fetch('/api/signup', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ employeeId: email, company, name, email, phone, password: pass, role: 'employee' })
+      });
+      const data = await res.json();
+      if(!res.ok){ generalMsg.textContent = data.error || 'Sign up failed.'; }
+      else{
+        alert('Account created! You can now sign in.');
+        goTo('signin');
+      }
+    }catch(err){
+      generalMsg.textContent = 'Could not reach the server. Is it running?';
+    }finally{
+      btn.textContent = 'Sign Up'; btn.disabled = false;
+    }
+  });
+</script>
+
+</body>
+</html>
