@@ -75,7 +75,7 @@ export function LoginPage() {
     try {
       await authService.signup({
         ...data,
-        logo: logoFile || undefined
+        ...(logoFile ? { logo: logoFile } : {})
       });
       // Switch back to login view after successful signup
       setView('login');
