@@ -253,14 +253,19 @@ All design tokens are defined in `frontend/src/index.css` via Tailwind CSS v4 `@
 
 ## 7. Current Project Status & Work Split
 
-### 7.1 What's Already Built (Core Infrastructure)
+### 7.1 What's Already Built (Core Infrastructure & Features)
 These pages and systems are completely finished:
 - **Routing & Auth Guards:** `App.tsx`, `RequireAuth.tsx`, `api.ts` (JWT interceptors)
 - **Employee Directory:** `EmployeesPage.tsx`
 - **Employee Profile:** `ProfilePage.tsx` (all 5 tabs working)
 - **Attendance:** `AttendancePage.tsx` (role-branched views, calendar, stats)
 - **Time Off:** `TimeOffPage.tsx` (balances, approve/reject UI)
+- **Request Time Off Modal:** Fully functional interactive leave calendar with validation, weekend exclusion logic, file attachments for sick leave, and full API integration (`POST /time-off/request`).
 - **Salary & Payroll:** `SalaryPage.tsx` (employee list sidebar + salary structure detail panel, net pay calc, tax/PF, admin wage updates)
+- **AI Features & Automations (Groq API):**
+  - **Natural-Language Time Off Parser:** Located in `RequestTimeOffModal.tsx`. Users can type unstructured text (e.g., "I need next Wednesday off for a family trip"), and the `aiService` automatically extracts and prefills the calendar dates, leave type, and reason.
+  - **Explain My Payslip:** Located in `SalaryInfoTab.tsx`. Provides a concise, plain-English breakdown of an employee's salary structure (Basic, HRA, PF, Tax, Net Pay) removing complex finance jargon.
+- **Backend & Database:** Complete FastAPI implementation with SQLAlchemy engine configured for automatic SQLite fallback (`database.py`) if PostgreSQL is unavailable. Schemas fully synced and resolving all circular dependencies (`user.py`, `employee.py`, `auth.py`). Conflicting pip constraints resolved.
 - **Mock Data Layer Verification:** `employeeService`, `attendanceService`, `timeOffService`, and `salaryService` operate gracefully offline using structured mock datasets.
 
 *(All TanStack Query, Zustand store, and shadcn/ui setups are done)*
@@ -276,8 +281,6 @@ Stub files (skeletons) exist for all remaining pages with UI layout and extensiv
    - **Task:** Wire it up to the real `/notifications/my` endpoint (you may need to create the service method in `api.ts`).
 4. **Add Employee Form (`src/pages/AddEmployeePage.tsx`)**
    - **Task:** Build out the form fields using `react-hook-form` and submit to `POST /employees`. The generated `login_id` will be returned by the backend — show it on the final step.
-5. **Request Time Off Modal (`src/components/time-off/RequestTimeOffModal.tsx`)**
-   - **Task:** Make the form actually submit the request using `POST /time-off/my-requests`.
 
 ---
 
