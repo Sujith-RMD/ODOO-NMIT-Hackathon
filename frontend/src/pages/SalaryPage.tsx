@@ -12,6 +12,7 @@ import {
 } from '../components/ui/table';
 import { Search, DollarSign } from 'lucide-react';
 import { formatCurrency } from '../utils/format';
+import { SalaryInfoTab } from '../components/salary/SalaryInfoTab';
 
 /**
  * ════════════════════════════════════════════════════════════════
@@ -120,16 +121,8 @@ export function SalaryPage() {
               <p className="text-sm">Select an employee to view salary details</p>
             </div>
           ) : (
-            // TODO: Replace this placeholder with:
-            // import { SalaryInfoTab } from '../components/salary/SalaryInfoTab';
-            // const fakeEmployee = employees.find(e => e.id === selectedEmployeeId)!;
-            // <SalaryInfoTab employee={fakeEmployee as any} />
-            <div className="p-4 border rounded-lg bg-card text-center text-muted-foreground text-sm">
-              {/* IMPLEMENT: Show WageInput + SalaryComponentsTable + TaxDeductionsSection */}
-              <p>Salary detail for employee #{selectedEmployeeId}</p>
-              <p className="text-xs mt-2 opacity-70">
-                Use: <code>{'<SalaryInfoTab employee={...} />'}</code> from components/salary/
-              </p>
+            <div className="p-0">
+              <SalaryInfoTab employee={employees.find(e => e.id === selectedEmployeeId) as any} />
             </div>
           )}
         </div>
