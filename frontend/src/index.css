@@ -3,13 +3,13 @@
 
 /* ── Design tokens / CSS variables ─────────────────────────── */
 @theme {
-  --color-background: #FAFAFA;
+  --color-background: #F7FAFC;
   --color-foreground: #1A1A1A;
   --color-card: #FFFFFF;
   --color-card-foreground: #1A1A1A;
   --color-popover: #FFFFFF;
   --color-popover-foreground: #1A1A1A;
-  --color-primary: #4F46E5;
+  --color-primary: #2F80ED;
   --color-primary-foreground: #FFFFFF;
   --color-secondary: #F3F4F6;
   --color-secondary-foreground: #1A1A1A;
@@ -17,16 +17,17 @@
   --color-muted-foreground: #6B7280;
   --color-accent: #F3F4F6;
   --color-accent-foreground: #1A1A1A;
-  --color-destructive: #EF4444;
+  --color-destructive: #EB5757;
   --color-destructive-foreground: #FFFFFF;
   --color-border: #E5E7EB;
   --color-input: #E5E7EB;
-  --color-ring: #4F46E5;
+  --color-ring: #2F80ED;
 
-  --color-status-present: #22C55E;
-  --color-status-absent: #EAB308;
-  --color-status-on-leave: #0EA5E9;
-  --color-status-error: #EF4444;
+  --color-status-present: #27AE60;
+  --color-status-absent: #F2C94C;
+  --color-status-on-leave: #2F80ED;
+  --color-status-pending: #94A3B8;
+  --color-status-error: #EB5757;
 
   --radius-sm: 4px;
   --radius-md: 6px;

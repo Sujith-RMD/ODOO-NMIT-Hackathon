@@ -25,7 +25,7 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       // Handle unauthorized access (e.g., token expired)
       useAuthStore.getState().logout();
-      window.location.href = '/sign-in';
+      window.location.href = '/login';
     }
     return Promise.reject(error);
   }

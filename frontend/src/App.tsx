@@ -5,26 +5,45 @@ import { EmployeesPage } from './pages/EmployeesPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { AttendancePage } from './pages/AttendancePage';
 import { TimeOffPage } from './pages/TimeOffPage';
+import { LoginPage } from './pages/LoginPage';
+import { DashboardPage } from './pages/DashboardPage';
+import { AddEmployeePage } from './pages/AddEmployeePage';
+import { SalaryPage } from './pages/SalaryPage';
+import { NotificationsPage } from './pages/NotificationsPage';
 
+import { RequireAuth } from './components/auth/RequireAuth';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { queryClient } from './lib/queryClient';
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route element={<AppShell />}>
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <Routes>
+          {/* Public routes — no auth required */}
+          <Route path="/login" element={<LoginPage />} />
 
-          {/* Protected routes */}
-          <Route path="/" element={<Navigate to="/employees" replace />} />
-          <Route path="/employees" element={<EmployeesPage />} />
-          <Route path="/employees/:id" element={<ProfilePage />} />
-          <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/attendance" element={<AttendancePage />} />
-          <Route path="/time-off" element={<TimeOffPage />} />
-          
-          {/* Catch all */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
+          <Route element={
+            <RequireAuth>
+              <AppShell />
+            </RequireAuth>
+          }>
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/employees" element={<EmployeesPage />} />
+            <Route path="/employees/new" element={<AddEmployeePage />} />
+            <Route path="/employees/:id" element={<ProfilePage />} />
+            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/attendance" element={<AttendancePage />} />
+            <Route path="/time-off" element={<TimeOffPage />} />
+            <Route path="/salary" element={<SalaryPage />} />
+            <Route path="/notifications" element={<NotificationsPage />} />
+
+            {/* Catch all */}
+            <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </QueryClientProvider>
   );
 }

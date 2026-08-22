@@ -10,8 +10,7 @@ export function AppShell() {
     hydrate();
   }, [hydrate]);
 
-  // TODO: Re-enable auth guard once sign-in page is integrated by teammate
-  // For now, render the app regardless of auth state so the UI is visible
+  // Auth guard is now implemented in App.tsx using RequireAuth wrapping AppShell
 
   return (
     <div className="min-h-screen flex flex-col bg-background">

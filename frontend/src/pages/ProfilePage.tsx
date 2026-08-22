@@ -1,43 +1,31 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { employeeService } from '../services/employeeService';
 import { useAuthStore } from '../store/authStore';
-import { EmployeeProfile as EmployeeProfileType } from '../types';
 import { ProfileHeader } from '../components/profile/ProfileHeader';
 import { ProfileTabs } from '../components/profile/ProfileTabs';
 import { Skeleton } from '../components/ui/skeleton';
 
 export function ProfilePage() {
   const { id } = useParams<{ id: string }>();
-  const { user } = useAuthStore();
+  const { user, isAuthenticated } = useAuthStore();
   const navigate = useNavigate();
   
-  const [employee, setEmployee] = useState<EmployeeProfileType | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
   // If no ID is provided, assume it's "My Profile"
   const employeeId = id ? parseInt(id, 10) : user?.id;
 
   useEffect(() => {
-    if (!employeeId) {
-      navigate('/sign-in');
-      return;
+    if (!isAuthenticated || !employeeId) {
+      navigate('/login');
     }
+  }, [isAuthenticated, employeeId, navigate]);
 
-    const fetchProfile = async () => {
-      setIsLoading(true);
-      try {
-        const data = await employeeService.getById(employeeId);
-        setEmployee(data);
-      } catch (error) {
-        console.error('Failed to load profile', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchProfile();
-  }, [employeeId, navigate]);
+  const { data: employee, isLoading } = useQuery({
+    queryKey: ['employee', employeeId],
+    queryFn: () => employeeService.getById(employeeId!),
+    enabled: !!employeeId,
+  });
 
   if (isLoading) {
     return (
