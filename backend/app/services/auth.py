@@ -112,7 +112,7 @@ class AuthService:
         """Generate unique login ID: [CompanyPrefix][First2FirstName+First2LastName][Year][Serial]"""
         prefix = settings.COMPANY_PREFIX.upper()
         name_part = (first_name[:2] + last_name[:2]).upper()
-        year_part = str(joining_year)[-2:]  # Last 2 digits of year
+        year_part = str(joining_year)  # Full 4-digit year per spec (e.g. OIJODO20260001)
 
         base = f"{prefix}{name_part}{year_part}"
 

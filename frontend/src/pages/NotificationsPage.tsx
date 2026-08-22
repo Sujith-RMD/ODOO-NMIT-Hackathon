@@ -4,78 +4,55 @@ import { api } from '../services/api';
 import { Card, CardContent } from '../components/ui/card';
 import { Skeleton } from '../components/ui/skeleton';
 import { Bell, Check, Clock } from 'lucide-react';
-import { formatDate } from '../utils/format';
 
-/**
- * ════════════════════════════════════════════════════════════════
- * NOTIFICATIONS PAGE  —  Route: /notifications
- * ════════════════════════════════════════════════════════════════
- *
- * OWNER: [YOUR FRIEND]
- * ACCESS: All (Employee & Admin)
- *
- * WHAT THIS PAGE SHOWS:
- *   A list of notifications for the current user.
- *
- * BACKEND ENDPOINTS:
- *   GET /notifications/my       → list notifications
- *   PUT /notifications/{id}/read  → mark a specific notification as read
- *   PUT /notifications/read-all   → mark all as read
- *
- * QUERY PATTERN:
- *   const { data: notifications } = useQuery({
- *     queryKey: ['notifications'],
- *     queryFn: async () => {
- *        const res = await api.get('/notifications/my');
- *        return res.data;
- *     }
- *   });
- *
- * DESIGN:
- *   - Simple list of cards.
- *   - Unread notifications should have a slightly different background or a dot indicator.
- *   - Button at the top to "Mark all as read".
- * ════════════════════════════════════════════════════════════════
- */
+// ── Types matching backend schema ──────────────────────────────
+interface Notification {
+  id: number;
+  title: string;
+  message: string;
+  is_read: boolean;
+  created_at: string;
+  notification_type?: string;
+}
 
 export function NotificationsPage() {
   const queryClient = useQueryClient();
 
-  const { data: notifications = [], isLoading } = useQuery({
+  // GET /notifications  (paginated — we use page 1 / size 50 for now)
+  const { data, isLoading } = useQuery({
     queryKey: ['notifications'],
     queryFn: async () => {
       try {
-        const res = await api.get('/notifications/my');
-        return res.data;
+        const res = await api.get('/notifications', { params: { page: 1, page_size: 50 } });
+        return res.data.items as Notification[];
       } catch (e) {
-        console.warn("Using mock notifications");
+        console.warn('Notifications backend not reachable — using mock data');
         return [
-          { id: 1, title: 'Leave Approved', message: 'Your leave request was approved.', is_read: false, created_at: new Date().toISOString() },
-          { id: 2, title: 'Welcome', message: 'Welcome to Dayflow!', is_read: true, created_at: new Date().toISOString() }
-        ];
+          { id: 1, title: 'Leave Approved', message: 'Your annual leave request for Aug 25–27 was approved.', is_read: false, created_at: new Date().toISOString() },
+          { id: 2, title: 'Welcome to Dayflow', message: 'Your account is set up and ready to go.', is_read: true, created_at: new Date().toISOString() },
+        ] as Notification[];
       }
-    }
+    },
   });
 
+  const notifications = data ?? [];
+  const unreadCount = notifications.filter(n => !n.is_read).length;
+
+  // POST /notifications/mark-read  { notification_ids: [id] }
   const markReadMutation = useMutation({
     mutationFn: async (id: number) => {
-      await api.put(`/notifications/${id}/read`);
+      await api.post('/notifications/mark-read', { notification_ids: [id] });
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notifications'] });
-    }
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['notifications'] }),
   });
 
+  // POST /notifications/mark-all-read
   const markAllReadMutation = useMutation({
     mutationFn: async () => {
-      await api.put('/notifications/read-all');
+      await api.post('/notifications/mark-all-read');
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notifications'] });
-    }
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['notifications'] }),
   });
-
-  const unreadCount = notifications.filter((n: any) => !n.is_read).length;
 
   return (
     <div className="w-full max-w-3xl mx-auto animate-in fade-in duration-300">
@@ -88,48 +65,68 @@ export function NotificationsPage() {
           <button
             onClick={() => markAllReadMutation.mutate()}
             disabled={markAllReadMutation.isPending}
-            className="text-sm text-primary hover:underline font-medium"
+            className="text-sm text-primary hover:underline font-medium disabled:opacity-50"
           >
             Mark all as read
           </button>
         )}
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-3">
         {isLoading ? (
-           [1, 2, 3].map(i => <Skeleton key={i} className="h-24 w-full rounded-xl" />)
+          [1, 2, 3].map(i => <Skeleton key={i} className="h-24 w-full rounded-xl" />)
         ) : notifications.length === 0 ? (
-          <div className="text-center py-12 text-muted-foreground border rounded-xl bg-card border-dashed">
+          <div className="text-center py-16 text-muted-foreground border rounded-xl bg-card border-dashed">
             <Bell className="h-8 w-8 mx-auto mb-3 opacity-20" />
-            <p>No notifications yet.</p>
+            <p className="text-sm">You're all caught up!</p>
           </div>
         ) : (
-          notifications.map((notif: any) => (
-            <Card key={notif.id} className={`border transition-colors ${!notif.is_read ? 'bg-primary/5 border-primary/20' : 'bg-card'}`}>
+          notifications.map(notif => (
+            <Card
+              key={notif.id}
+              className={`border transition-colors ${
+                !notif.is_read ? 'bg-primary/[0.03] border-primary/20' : 'bg-card'
+              }`}
+            >
               <CardContent className="p-4 flex gap-4 items-start">
-                <div className={`p-2 rounded-full mt-1 ${!notif.is_read ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
+                {/* Icon */}
+                <div className={`p-2 rounded-full mt-0.5 shrink-0 ${
+                  !notif.is_read ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
+                }`}>
                   <Bell className="h-4 w-4" />
                 </div>
-                <div className="flex-1">
-                  <div className="flex justify-between items-start mb-1">
-                    <h3 className={`font-semibold ${!notif.is_read ? 'text-foreground' : 'text-foreground/80'}`}>
+
+                {/* Content */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex justify-between items-start gap-2 mb-0.5">
+                    <h3 className={`font-semibold text-sm leading-snug ${
+                      !notif.is_read ? 'text-foreground' : 'text-foreground/80'
+                    }`}>
                       {notif.title}
+                      {!notif.is_read && (
+                        <span className="inline-block ml-2 w-1.5 h-1.5 rounded-full bg-primary align-middle" />
+                      )}
                     </h3>
-                    <span className="text-xs text-muted-foreground flex items-center gap-1">
+                    <span className="text-xs text-muted-foreground flex items-center gap-1 shrink-0">
                       <Clock className="h-3 w-3" />
-                      {new Date(notif.created_at).toLocaleDateString()}
+                      {new Date(notif.created_at).toLocaleDateString('en-IN', {
+                        day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
+                      })}
                     </span>
                   </div>
                   <p className="text-sm text-muted-foreground">{notif.message}</p>
                 </div>
+
+                {/* Mark read button */}
                 {!notif.is_read && (
-                   <button
-                     onClick={() => markReadMutation.mutate(notif.id)}
-                     className="p-1.5 rounded-md hover:bg-black/5 dark:hover:bg-white/10 text-muted-foreground"
-                     title="Mark as read"
-                   >
-                     <Check className="h-4 w-4" />
-                   </button>
+                  <button
+                    onClick={() => markReadMutation.mutate(notif.id)}
+                    disabled={markReadMutation.isPending}
+                    title="Mark as read"
+                    className="p-1.5 rounded-md hover:bg-black/5 text-muted-foreground hover:text-foreground transition-colors shrink-0 disabled:opacity-50"
+                  >
+                    <Check className="h-4 w-4" />
+                  </button>
                 )}
               </CardContent>
             </Card>

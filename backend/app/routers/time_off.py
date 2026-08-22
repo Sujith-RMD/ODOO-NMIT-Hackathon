@@ -85,6 +85,7 @@ def get_my_balances(
 
 
 @router.post("/my-requests", response_model=TimeOffRequestResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/request", response_model=TimeOffRequestResponse, status_code=status.HTTP_201_CREATED)
 def create_time_off_request(
     data: TimeOffRequestCreate,
     time_off_service: TimeOffService = Depends(get_time_off_service),

@@ -51,7 +51,7 @@ export function RequestTimeOffModal() {
   // 2. Mutation to submit request
   const mutation = useMutation({
     mutationFn: async (data: any) => {
-      await api.post('/time-off/my-requests', data);
+      await api.post('/time-off/request', data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['time-off', 'my-requests'] });
