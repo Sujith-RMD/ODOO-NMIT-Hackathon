@@ -43,6 +43,7 @@
 ODOO-NMIT-Hackathon/
 ├── PROJECT_CONTEXT.md              # <-- THIS DOCUMENT (Full Project Blueprint)
 ├── README.md
+├── VAIBHAV_tasks.md               # Specific hackathon task sheet
 ├── backend/
 │   ├── app/
 │   │   ├── main.py                # FastAPI entry point & CORS configuration
@@ -214,7 +215,7 @@ To achieve instant feedback when adjusting employee wages (without lag), the fro
 
 ## 6. Design System Guidelines & Color Tokens
 
-All design tokens are defined in `frontend/src/index.css` via Tailwind CSS v4 `@theme`:
+All design tokens are defined in `frontend/src/index.css` via Tailwind CSS v4 `@theme`. Use semantic Tailwind classes — **never raw hex codes**:
 
 ```css
 @theme {
@@ -231,13 +232,13 @@ All design tokens are defined in `frontend/src/index.css` via Tailwind CSS v4 `@
   --color-input: #E5E7EB;
   --color-ring: #2F80ED;
 
-  --color-status-present: #27AE60;    /* Green */
-  --color-status-absent: #F2C94C;     /* Yellow */
-  --color-status-on-leave: #2F80ED;   /* Blue */
-  --color-status-pending: #94A3B8;    /* Slate */
-  --color-status-error: #EB5757;      /* Red */
-  --color-status-late: #F97316;       /* Orange */
-  --color-status-half-day: #A855F7;   /* Purple */
+  --color-status-present: #27AE60;    /* Green / Approved / Success */
+  --color-status-absent: #F2C94C;     /* Yellow / Warning */
+  --color-status-on-leave: #2F80ED;   /* Blue / On Leave */
+  --color-status-pending: #94A3B8;    /* Slate / Neutral */
+  --color-status-error: #EB5757;      /* Red / Rejected / Error */
+  --color-status-late: #F97316;       /* Orange / Late */
+  --color-status-half-day: #A855F7;   /* Purple / Half Day */
 
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
 }
@@ -250,20 +251,40 @@ All design tokens are defined in `frontend/src/index.css` via Tailwind CSS v4 `@
 
 ---
 
-## 7. Current Project Status & Recent Work Done
+## 7. Current Project Status & Work Split
 
-1. **Fixed UI Primitive Imports:**  
-   Replaced all generic `radix-ui` barrel imports in `src/components/ui/` with direct `@radix-ui/react-*` primitives to resolve Vite bundler resolution errors.
-2. **TSConfig & CSS Normalization:**  
-   Set `verbatimModuleSyntax: false` in `tsconfig.app.json` to allow clean TypeScript type imports across service files. Moved Google Fonts `@import` to `index.html` to adhere to CSS spec rules.
-3. **Mock Data Layer Verification:**  
-   Verified that `employeeService`, `attendanceService`, `timeOffService`, and `salaryService` operate gracefully offline using structured mock datasets.
-4. **Git Repository Synchronization:**  
-   Resolved merge/rebase conflicts with remote branch updates and verified all files are synced on `main`.
+### 7.1 What's Already Built (Core Infrastructure)
+These pages and systems are completely finished:
+- **Routing & Auth Guards:** `App.tsx`, `RequireAuth.tsx`, `api.ts` (JWT interceptors)
+- **Employee Directory:** `EmployeesPage.tsx`
+- **Employee Profile:** `ProfilePage.tsx` (all 5 tabs working)
+- **Attendance:** `AttendancePage.tsx` (role-branched views, calendar, stats)
+- **Time Off:** `TimeOffPage.tsx` (balances, approve/reject UI)
+- **Salary & Payroll:** `SalaryPage.tsx` (employee list sidebar + salary structure detail panel, net pay calc, tax/PF, admin wage updates)
+- **Mock Data Layer Verification:** `employeeService`, `attendanceService`, `timeOffService`, and `salaryService` operate gracefully offline using structured mock datasets.
+
+*(All TanStack Query, Zustand store, and shadcn/ui setups are done)*
+
+### 7.2 Pending Work (For Teammate / Fattah)
+Stub files (skeletons) exist for all remaining pages with UI layout and extensive comments explaining backend endpoints and query patterns.
+
+1. **Login Page (`src/pages/LoginPage.tsx`)**
+   - **Task:** Integrate the login UI. Replace the dev bypass button with a real form that calls `POST /auth/login` and saves the token to `useAuthStore().login(token, user)`.
+2. **Dashboard (`src/pages/DashboardPage.tsx`)**
+   - **Task:** Wire up the data. Needs to show 4 stat cards (Total employees, present today, etc for admin; leave balances for employee). Use the `attendanceService` and `timeOffService` to fetch the data.
+3. **Notifications (`src/pages/NotificationsPage.tsx`)**
+   - **Task:** Wire it up to the real `/notifications/my` endpoint (you may need to create the service method in `api.ts`).
+4. **Add Employee Form (`src/pages/AddEmployeePage.tsx`)**
+   - **Task:** Build out the form fields using `react-hook-form` and submit to `POST /employees`. The generated `login_id` will be returned by the backend — show it on the final step.
+5. **Request Time Off Modal (`src/components/time-off/RequestTimeOffModal.tsx`)**
+   - **Task:** Make the form actually submit the request using `POST /time-off/my-requests`.
 
 ---
 
 ## 8. Developer Quick-Start Guide
+
+### How to test the app right now (Dev Bypass)
+Run the dev server and click the **"Dev Login (bypass)"** button on the login page. It will log you in as an Admin using a mock token, allowing you to click around all the finished pages and see the stubs for the unfinished ones.
 
 ### How to Run Frontend locally:
 ```bash
