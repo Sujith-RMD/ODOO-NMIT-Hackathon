@@ -50,11 +50,11 @@ class Employee(Base):
     user = relationship("User", back_populates="employee")
     manager = relationship("Employee", remote_side=[id], backref="subordinates")
     attendances = relationship("Attendance", back_populates="employee", cascade="all, delete-orphan")
-    time_off_requests = relationship("TimeOffRequest", back_populates="employee", cascade="all, delete-orphan")
+    time_off_requests = relationship("TimeOffRequest", foreign_keys="TimeOffRequest.employee_id", back_populates="employee", cascade="all, delete-orphan")
     time_off_allocations = relationship("TimeOffAllocation", back_populates="employee", cascade="all, delete-orphan")
     salary_structure = relationship("SalaryStructure", back_populates="employee", uselist=False, cascade="all, delete-orphan")
     notifications = relationship("Notification", back_populates="employee", cascade="all, delete-orphan")
-    documents = relationship("Document", back_populates="employee", cascade="all, delete-orphan")
+    documents = relationship("Document", foreign_keys="Document.employee_id", back_populates="employee", cascade="all, delete-orphan")
 
     @property
     def full_name(self):

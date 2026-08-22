@@ -9,9 +9,12 @@ from app.models.employee import Employee
 from app.schemas.auth import LoginRequest, LoginResponse, TokenData, ChangePasswordRequest, ChangePasswordResponse, UserResponse
 from app.schemas.employee import EmployeeCreate
 from fastapi import HTTPException, status
+from fastapi.security import OAuth2PasswordBearer
 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 
 class AuthService:
@@ -30,6 +33,9 @@ class AuthService:
             expire = datetime.utcnow() + expires_delta
         else:
             expire = datetime.utcnow() + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+        # Ensure 'sub' is a string as per JWT spec
+        if "sub" in to_encode:
+            to_encode["sub"] = str(to_encode["sub"])
         to_encode.update({"exp": expire})
         encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
         return encoded_jwt

@@ -20,7 +20,36 @@ def get_current_user(token: str = Depends(oauth2_scheme), auth_service: AuthServ
 
 
 @router.post("/login", response_model=LoginResponse)
-def login(login_data: LoginRequest, auth_service: AuthService = Depends(get_auth_service)):
+async def login(
+    form_data: OAuth2PasswordRequestForm = Depends(),
+    auth_service: AuthService = Depends(get_auth_service)
+):
+    """OAuth2 compatible login - accepts form data with username (login_id) and password"""
+    user = auth_service.authenticate_user(form_data.username, form_data.password)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid login ID or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Account is deactivated",
+        )
+
+    access_token = auth_service.create_access_token(
+        data={"sub": user.id, "login_id": user.login_id, "role": user.role.value}
+    )
+    return LoginResponse(
+        access_token=access_token,
+        user=UserResponse.model_validate(user)
+    )
+
+
+@router.post("/login-json", response_model=LoginResponse)
+def login_json(login_data: LoginRequest, auth_service: AuthService = Depends(get_auth_service)):
+    """Legacy JSON login - accepts login_id and password in JSON body"""
     return auth_service.login(login_data)
 
 
