@@ -1,11 +1,12 @@
 import React, { useState, useCallback } from 'react';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { api } from '../../services/api';
+import { aiService } from '../../services/aiService';
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger
 } from '../ui/dialog';
 import { Button } from '../ui/button';
-import { Plus, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus, ChevronLeft, ChevronRight, Wand2, Paperclip, Loader2 } from 'lucide-react';
 import './LeaveCalendar.css';
 
 // ─── Date helpers ──────────────────────────────────────────────────────────
@@ -212,6 +213,43 @@ export function RequestTimeOffModal() {
   // Step 2 form state
   const [leaveTypeId, setLeaveTypeId] = useState('');
   const [reason, setReason] = useState('');
+  
+  // AI & Attachment state
+  const [aiPrompt, setAiPrompt] = useState('');
+  const [isParsing, setIsParsing] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
+  const [attachment, setAttachment] = useState<File | null>(null);
+
+  const handleAIPrefill = async () => {
+    if (!aiPrompt.trim()) return;
+    setIsParsing(true);
+    setAiError(null);
+    try {
+      const parsed = await aiService.parseTimeOffDescription(aiPrompt);
+      if (parsed.start_date) {
+        const d = new Date(parsed.start_date + 'T00:00:00');
+        setRangeStart(stripTime(d));
+      }
+      if (parsed.end_date) {
+        const d = new Date(parsed.end_date + 'T00:00:00');
+        setRangeEnd(stripTime(d));
+      }
+      if (parsed.reason) {
+        setReason(parsed.reason);
+      }
+      if (parsed.type) {
+        const lowerType = parsed.type.toLowerCase();
+        const typeMatch = leaveTypes.find((t: any) => t.name.toLowerCase().includes(lowerType));
+        if (typeMatch) setLeaveTypeId(String(typeMatch.id));
+      }
+      
+      setAiPrompt('');
+    } catch (e) {
+      setAiError("Couldn't parse that — please fill the form manually");
+    } finally {
+      setIsParsing(false);
+    }
+  };
 
   // Fetch leave types
   const { data: leaveTypes = [] } = useQuery({
@@ -245,6 +283,7 @@ export function RequestTimeOffModal() {
       setStep(1);
       setRangeStart(null); setRangeEnd(null); setHoverDate(null);
       setLeaveTypeId(''); setReason('');
+      setAiPrompt(''); setAiError(null); setAttachment(null);
       const d = new Date(); d.setDate(1);
       setViewMonth(d);
     }, 200);
@@ -331,6 +370,32 @@ export function RequestTimeOffModal() {
           {/* ── STEP 1: Calendar ─────────────────────────────────── */}
           {step === 1 && (
             <div>
+              {/* AI Prefill */}
+              <div className="mb-5 bg-primary/5 border border-primary/20 rounded-xl p-3">
+                <label className="flex items-center gap-1.5 text-xs font-bold text-primary mb-2">
+                  <Wand2 className="h-3.5 w-3.5" />
+                  AI Auto-Fill
+                </label>
+                <div className="flex gap-2">
+                  <textarea
+                    value={aiPrompt}
+                    onChange={(e) => setAiPrompt(e.target.value)}
+                    placeholder="E.g. 'I need next Monday and Tuesday off for a family wedding'"
+                    className="flex-1 border border-border rounded-lg px-3 py-2 text-sm bg-background resize-none focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    rows={2}
+                  />
+                  <Button 
+                    type="button" 
+                    onClick={handleAIPrefill} 
+                    disabled={isParsing || !aiPrompt.trim()}
+                    className="self-end shrink-0"
+                  >
+                    {isParsing ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Fill form'}
+                  </Button>
+                </div>
+                {aiError && <p className="text-xs text-destructive mt-2">{aiError}</p>}
+              </div>
+
               <LeaveCalendar
                 rangeStart={rangeStart}
                 rangeEnd={rangeEnd}
@@ -408,6 +473,30 @@ export function RequestTimeOffModal() {
                   className="w-full border border-border rounded-[10px] px-3 py-2.5 text-sm bg-background resize-none focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
                 />
               </div>
+
+              {/* Attachment */}
+              {(leaveTypeId === '2' || true) && (
+                <div className="space-y-1.5 mb-5">
+                  <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wide">
+                    Attachment <span className="font-normal normal-case">(Medical cert, etc)</span>
+                  </label>
+                  <div className="border-2 border-dashed border-border rounded-xl p-4 text-center hover:bg-muted/50 transition-colors">
+                    <input
+                      type="file"
+                      id="file-upload"
+                      className="hidden"
+                      onChange={(e) => setAttachment(e.target.files?.[0] || null)}
+                    />
+                    <label htmlFor="file-upload" className="cursor-pointer flex flex-col items-center gap-1">
+                      <Paperclip className="h-5 w-5 text-muted-foreground" />
+                      <span className="text-sm text-foreground font-medium">
+                        {attachment ? attachment.name : "Click to upload file"}
+                      </span>
+                      <span className="text-xs text-muted-foreground">PDF, JPG, PNG up to 5MB</span>
+                    </label>
+                  </div>
+                </div>
+              )}
 
               <div className="flex gap-2.5">
                 <Button type="button" variant="outline" className="flex-1" onClick={() => setStep(1)}>
