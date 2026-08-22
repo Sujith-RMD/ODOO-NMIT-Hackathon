@@ -21,14 +21,15 @@ export default function App() {
       <BrowserRouter>
         <Routes>
           {/* Public routes — no auth required */}
-          <Route path="/login" element={<LoginPage />} />
+          <Route path="/" element={<LoginPage />} />
+          <Route path="/login" element={<Navigate to="/" replace />} />
 
           <Route element={
             <RequireAuth>
               <AppShell />
             </RequireAuth>
           }>
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            {/* Protected routes */}
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/employees" element={<EmployeesPage />} />
             <Route path="/employees/new" element={<AddEmployeePage />} />
