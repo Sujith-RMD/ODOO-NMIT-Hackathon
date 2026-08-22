@@ -215,11 +215,9 @@ export function TopNav() {
       <div className="flex h-14 items-center gap-6 px-4 md:px-6 max-w-7xl mx-auto w-full">
 
         {/* Logo */}
-        <NavLink to="/employees" className="flex items-center gap-2 shrink-0 select-none">
-          <div className="flex items-center justify-center h-7 w-7 rounded-lg bg-primary text-primary-foreground">
-            <Timer className="h-4 w-4" />
-          </div>
-          <span className="font-bold text-base tracking-tight text-foreground">
+        <NavLink to="/employees" className="flex items-center gap-1 shrink-0 select-none">
+          <img src="/dayflowbg.png" alt="Dayflow" className="h-12 w-12 object-contain" />
+          <span className="font-bold text-lg tracking-tight text-foreground">
             Day<span className="text-primary">flow</span>
           </span>
         </NavLink>
