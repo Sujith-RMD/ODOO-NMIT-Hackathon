@@ -2,7 +2,7 @@ from pydantic import BaseModel, EmailStr, field_validator
 from typing import Optional, List
 from datetime import date, datetime
 from app.models.employee import EmploymentStatus
-from app.schemas.user import UserResponse
+from app.schemas.auth import UserResponse
 
 
 class EmployeeBase(BaseModel):
