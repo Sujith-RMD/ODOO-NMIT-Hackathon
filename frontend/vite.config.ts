@@ -17,6 +17,15 @@ export default defineConfig({
         target: 'http://localhost:8000',
         changeOrigin: true,
       },
+      '/groq': {
+        target: 'https://api.groq.com',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/groq/, ''),
+        headers: {
+          'Referer': 'https://api.groq.com',
+          'Origin': 'https://api.groq.com'
+        }
+      },
     },
   },
 })
