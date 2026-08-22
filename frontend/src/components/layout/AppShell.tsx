@@ -5,29 +5,13 @@ import { TopNav } from './TopNav';
 
 export function AppShell() {
   const { isAuthenticated, hydrate } = useAuthStore();
-  const navigate = useNavigate();
-  const location = useLocation();
 
   useEffect(() => {
     hydrate();
   }, [hydrate]);
 
-  useEffect(() => {
-    // Basic route protection
-    if (!isAuthenticated && location.pathname !== '/sign-in' && location.pathname !== '/sign-up') {
-      navigate('/sign-in');
-    }
-  }, [isAuthenticated, location, navigate]);
-
-  if (!isAuthenticated && (location.pathname === '/sign-in' || location.pathname === '/sign-up')) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Outlet />
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) return null;
+  // TODO: Re-enable auth guard once sign-in page is integrated by teammate
+  // For now, render the app regardless of auth state so the UI is visible
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
