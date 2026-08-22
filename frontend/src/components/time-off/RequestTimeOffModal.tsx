@@ -24,10 +24,11 @@ function addDays(d: Date, n: number) { const c = new Date(d); c.setDate(c.getDat
 function computeRange(start: Date, end: Date) {
   const working = new Set<string>();
   const weekends = new Set<string>();
-  const from = start <= end ? start : end;
-  const to   = start <= end ? end   : start;
-  let cursor = new Date(from);
-  while (cursor <= to) {
+  // Always strip time so comparison is purely date-based (Bug 4 fix)
+  const from = stripTime(start <= end ? start : end);
+  const to   = stripTime(start <= end ? end   : start);
+  let cursor = stripTime(from);
+  while (cursor.getTime() <= to.getTime()) {
     const key = dateKey(cursor);
     isWeekend(cursor) ? weekends.add(key) : working.add(key);
     cursor = addDays(cursor, 1);
@@ -113,9 +114,10 @@ function LeaveCalendar({
           if (rangeWeekendKeys.has(key)) classes.push('weekend-excluded');
         }
       } else if (rangeStart && !rangeEnd) {
-        if (key === rStart) classes.push('range-single');
-        // preview
-        if (previewFrom && previewTo) {
+        const isAnchor = key === rStart;
+        if (isAnchor) classes.push('range-single');
+        // preview — only apply to non-anchor cells to avoid class conflicts (Bug 3 fix)
+        if (!isAnchor && previewFrom && previewTo) {
           if (cellDate >= stripTime(previewFrom) && cellDate <= stripTime(previewTo)) {
             const pfKey = dateKey(previewFrom), ptKey = dateKey(previewTo);
             if (key === pfKey) classes.push('preview-start');
@@ -249,12 +251,25 @@ export function RequestTimeOffModal() {
   }, []);
 
   const handleDayClick = useCallback((d: Date) => {
-    if (!rangeStart || (rangeStart && rangeEnd)) {
-      // start fresh
-      setRangeStart(d); setRangeEnd(null);
+    const strippedD = stripTime(d);
+    const strippedToday = stripTime(new Date());
+    // Bug 2 fix: guard against past dates (belt-and-suspenders beyond the render guard)
+    if (strippedD.getTime() < strippedToday.getTime()) return;
+
+    if (!rangeStart || rangeEnd) {
+      // Start fresh — either no selection yet, or range already complete (re-click starts over)
+      setRangeStart(strippedD);
+      setRangeEnd(null);
+      setHoverDate(null);
     } else {
-      // set end (can be before start — we sort on render)
-      setRangeEnd(d);
+      // Bug 1 fix: clicking the same date as rangeStart → treat as single-day selection (confirm it)
+      if (strippedD.getTime() === rangeStart.getTime()) {
+        setRangeEnd(strippedD);
+      } else {
+        setRangeEnd(strippedD);
+      }
+      // Bug 4 fix: clear hover once range is confirmed so no stale preview lingers
+      setHoverDate(null);
     }
   }, [rangeStart, rangeEnd]);
 
