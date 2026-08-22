@@ -30,11 +30,11 @@ export function EmployeesPage() {
         <p className="text-muted">Find and connect with people in your organization.</p>
       </div>
 
-      <EmployeeSearchBar 
-        searchTerm={searchTerm} 
-        onSearchChange={setSearchTerm} 
+      <EmployeeSearchBar
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
       />
-      
+
       <EmployeeGrid employees={employees} isLoading={isLoading} />
     </div>
   );

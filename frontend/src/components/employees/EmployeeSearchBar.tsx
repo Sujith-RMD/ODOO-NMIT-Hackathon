@@ -28,7 +28,7 @@ export function EmployeeSearchBar({ searchTerm, onSearchChange }: EmployeeSearch
           onChange={(e) => onSearchChange(e.target.value)}
         />
       </div>
-      
+
       {isAdmin && (
         <Button asChild className="w-full sm:w-auto h-10 px-5 shadow-sm transition-transform hover:scale-[1.02]" variant="default">
           <Link to="/employees/new">

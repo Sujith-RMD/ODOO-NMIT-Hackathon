@@ -28,10 +28,10 @@ export function EmployeeCard({ employee }: EmployeeCardProps) {
     >
       <Link to={`/employees/${employee.id}`} className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-xl h-full">
         <div className="bg-card hover:shadow-lg transition-all duration-300 rounded-xl overflow-hidden border border-border/60 flex flex-col h-full group relative">
-          
+
           {/* Cover Header */}
           <div className={`h-20 w-full bg-gradient-to-r ${gradientClass} opacity-80 group-hover:opacity-100 transition-opacity`} />
-          
+
           {/* Status Badge */}
           <div className="absolute top-2.5 right-2.5 shadow-sm bg-card/80 backdrop-blur-sm rounded-full z-10">
             <StatusDot status={employee.status} />
@@ -45,16 +45,16 @@ export function EmployeeCard({ employee }: EmployeeCardProps) {
                 {employee.initials}
               </AvatarFallback>
             </Avatar>
-            
+
             <h3 className="font-bold text-foreground text-base tracking-tight mb-1 truncate w-full text-center group-hover:text-primary transition-colors">
               {employee.full_name}
             </h3>
-            
+
             <p className="text-sm font-medium text-muted-foreground truncate w-full text-center flex items-center justify-center gap-1.5 mb-1.5">
               <Briefcase className="h-3.5 w-3.5 opacity-70" />
               {employee.position || 'No Position'}
             </p>
-            
+
             <div className="mt-auto pt-4 flex items-center justify-center w-full">
               <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-secondary/50 border border-secondary text-secondary-foreground text-xs font-semibold rounded-full truncate max-w-full">
                 <Building2 className="h-3 w-3 opacity-70" />

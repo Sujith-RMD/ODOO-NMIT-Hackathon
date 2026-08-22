@@ -79,7 +79,7 @@ function LeaveCalendar({
     previewTo   = rangeStart <= hoverDate ? hoverDate  : rangeStart;
   }
 
-  const cells: JSX.Element[] = [];
+  const cells: React.ReactNode[] = [];
 
   // blank cells
   for (let i = 0; i < firstDay; i++) {
