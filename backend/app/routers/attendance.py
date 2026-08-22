@@ -24,7 +24,9 @@ def get_auth_service(db: Session = Depends(get_db)) -> AuthService:
     return AuthService(db)
 
 
-def get_current_user(token: str = Depends(AuthService.oauth2_scheme), auth_service: AuthService = Depends(get_auth_service)) -> User:
+from app.services.auth import oauth2_scheme
+
+def get_current_user(token: str = Depends(oauth2_scheme), auth_service: AuthService = Depends(get_auth_service)) -> User:
     return auth_service.get_current_user(token)
 
 

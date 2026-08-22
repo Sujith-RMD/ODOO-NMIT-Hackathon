@@ -67,7 +67,11 @@ class TimeOffService:
         page: int = 1,
         page_size: int = 20
     ) -> tuple[List[TimeOffRequest], int]:
-        query = self.db.query(TimeOffRequest).join(Employee)
+        query = self.db.query(TimeOffRequest).join(
+            Employee,
+            TimeOffRequest.employee_id == Employee.id
+        )
+
         if status:
             query = query.filter(TimeOffRequest.status == status)
         if employee_id:
@@ -78,21 +82,36 @@ class TimeOffService:
             query = query.filter(TimeOffRequest.end_date <= end_date)
 
         total = query.count()
-        requests = query.order_by(TimeOffRequest.created_at.desc()).offset(
+
+        requests = query.order_by(
+            TimeOffRequest.created_at.desc()
+        ).offset(
             (page - 1) * page_size
         ).limit(page_size).all()
+
         return requests, total
 
-    def create_request(self, employee_id: int, data: TimeOffRequestCreate) -> TimeOffRequest:
-        # Calculate total days
+    def create_request(
+        self,
+        employee_id: int,
+        data: TimeOffRequestCreate
+    ) -> TimeOffRequest:
         total_days = (data.end_date - data.start_date).days + 1
 
-        # Check available balance for paid types
         time_off_type = self.get_time_off_type_by_id(data.time_off_type_id)
+
         if time_off_type and time_off_type.is_paid:
-            allocation = self.get_allocation(employee_id, data.time_off_type_id, data.start_date.year)
+            allocation = self.get_allocation(
+                employee_id,
+                data.time_off_type_id,
+                data.start_date.year
+            )
+
             if allocation and allocation.available_days < total_days:
-                raise ValueError(f"Insufficient {time_off_type.name} balance. Available: {allocation.available_days} days")
+                raise ValueError(
+                    f"Insufficient {time_off_type.name} balance. "
+                    f"Available: {allocation.available_days} days"
+                )
 
         request = TimeOffRequest(
             employee_id=employee_id,
@@ -104,11 +123,36 @@ class TimeOffService:
             attachment_url=data.attachment_url,
             status=TimeOffRequestStatus.PENDING
         )
+
         self.db.add(request)
         self.db.commit()
         self.db.refresh(request)
+
         return request
 
+    def update_request(
+        self,
+        request_id: int,
+        data: TimeOffRequestCreate
+    ) -> Optional[TimeOffRequest]:
+        request = self.get_time_off_request(request_id)
+
+        if not request or request.status != TimeOffRequestStatus.PENDING:
+            return None
+
+        total_days = (data.end_date - data.start_date).days + 1
+
+        request.time_off_type_id = data.time_off_type_id
+        request.start_date = data.start_date
+        request.end_date = data.end_date
+        request.total_days = total_days
+        request.reason = data.reason
+        request.attachment_url = data.attachment_url
+
+        self.db.commit()
+        self.db.refresh(request)
+
+        return request
     def update_request(self, request_id: int, data: TimeOffRequestCreate) -> Optional[TimeOffRequest]:
         request = self.get_time_off_request(request_id)
         if not request or request.status != TimeOffRequestStatus.PENDING:
