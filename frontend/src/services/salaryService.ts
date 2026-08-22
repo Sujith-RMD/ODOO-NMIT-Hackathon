@@ -5,7 +5,7 @@ import { SalaryStructure, SalaryCalculationResult } from '../types';
 export const salaryService = {
   getStructure: async (employeeId: number): Promise<SalaryStructure> => {
     try {
-      const response = await api.get(`/salary/structure/${employeeId}`);
+      const response = await api.get(`/salary/admin/${employeeId}`);
       return response.data;
     } catch (error) {
       console.warn('Backend get salary structure failed, using mock.', error);
@@ -83,7 +83,7 @@ export const salaryService = {
 
   updateStructure: async (employeeId: number, data: any): Promise<SalaryStructure> => {
     try {
-      const response = await api.put(`/salary/structure/${employeeId}`, data);
+      const response = await api.put(`/salary/admin/${employeeId}`, data);
       return response.data;
     } catch (error) {
       console.warn('Backend update salary failed, using mock.', error);

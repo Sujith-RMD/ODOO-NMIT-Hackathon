@@ -2,6 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { api } from '../../services/api';
 import { aiService } from '../../services/aiService';
+import { timeOffService } from '../../services/timeOffService';
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger
 } from '../ui/dialog';
@@ -269,7 +270,9 @@ export function RequestTimeOffModal() {
   });
 
   const mutation = useMutation({
-    mutationFn: async (data: any) => { await api.post('/time-off/request', data); },
+    mutationFn: async (data: { time_off_type_id: number; start_date: string; end_date: string; reason?: string }) => {
+      await timeOffService.createRequest(data as any);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['time-off', 'my-requests'] });
       queryClient.invalidateQueries({ queryKey: ['time-off', 'my-balances'] });

@@ -20,16 +20,14 @@ const MOCK_LOGIN_RESPONSE: LoginResponse = {
 export const authService = {
   login: async (data: LoginRequest): Promise<LoginResponse> => {
     try {
-      const response = await api.post<LoginResponse>('/auth/login', data);
+      const response = await api.post<LoginResponse>('/auth/login-json', data);
       return response.data;
-    } catch (error) {
-      console.warn('Backend login failed, using mock data for demo.', error);
-      // Simulate network delay
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      if (data.login_id && data.password) {
-        return MOCK_LOGIN_RESPONSE;
+    } catch (error: any) {
+      console.warn('Backend login failed', error);
+      if (!error.response) {
+        throw new Error('Could not connect to server. Is the backend running?');
       }
-      throw new Error('Invalid credentials');
+      throw new Error(error.response?.data?.detail || 'Invalid credentials');
     }
   },
 

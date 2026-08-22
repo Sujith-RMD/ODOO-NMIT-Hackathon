@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { api } from '../services/api';
+import { employeeService } from '../services/employeeService';
 import { Label } from '../components/ui/label';
 import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
@@ -74,8 +74,8 @@ export function AddEmployeePage() {
 
   const mutation = useMutation({
     mutationFn: async ({ payload, password }: { payload: object; password: string }) => {
-      const res = await api.post(`/employees?password=${encodeURIComponent(password)}`, payload);
-      return res.data;
+      const res = await employeeService.create(payload as any, password);
+      return res;
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['employees'] });

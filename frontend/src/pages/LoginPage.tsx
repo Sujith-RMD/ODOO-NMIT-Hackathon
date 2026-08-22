@@ -273,43 +273,7 @@ export function LoginPage() {
         </CardContent>
       </Card>
       
-      {/* Dev Bypass Buttons for ease of testing */}
-      <div className="mt-8 flex gap-4 justify-center">
-        <button
-          type="button"
-          onClick={() => {
-            login('mock-admin-token', {
-              id: 1,
-              login_id: 'OIJODO26001',
-              email: 'admin@dayflow.com',
-              role: 'admin',
-              is_active: true,
-              created_at: new Date().toISOString(),
-            });
-            navigate('/dashboard');
-          }}
-          className="px-3 py-1.5 bg-secondary text-secondary-foreground rounded text-xs hover:bg-secondary/80 border opacity-50 hover:opacity-100 transition-opacity"
-        >
-          Dev Login (Admin)
-        </button>
-        <button
-          type="button"
-          onClick={() => {
-            login('mock-employee-token', {
-              id: 2,
-              login_id: 'OIJODO26002',
-              email: 'employee@dayflow.com',
-              role: 'employee',
-              is_active: true,
-              created_at: new Date().toISOString(),
-            });
-            navigate('/dashboard');
-          }}
-          className="px-3 py-1.5 bg-secondary text-secondary-foreground rounded text-xs hover:bg-secondary/80 border opacity-50 hover:opacity-100 transition-opacity"
-        >
-          Dev Login (Employee)
-        </button>
-      </div>
+      {/* Dev Bypass Buttons removed */}
     </div>
   );
 }

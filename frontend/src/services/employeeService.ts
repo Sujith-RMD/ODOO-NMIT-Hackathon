@@ -165,9 +165,10 @@ export const employeeService = {
     }
   },
 
-  create: async (data: EmployeeCreateRequest): Promise<EmployeeProfile> => {
+  create: async (data: EmployeeCreateRequest, password?: string): Promise<EmployeeProfile> => {
     try {
-      const response = await api.post('/employees', data);
+      const endpoint = password ? `/employees?password=${encodeURIComponent(password)}` : '/employees';
+      const response = await api.post(endpoint, data);
       return response.data;
     } catch (error) {
       console.warn('Backend create employee failed, using mock data.', error);

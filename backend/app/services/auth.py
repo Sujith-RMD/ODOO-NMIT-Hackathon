@@ -53,7 +53,9 @@ class AuthService:
             return None
 
     def authenticate_user(self, login_id: str, password: str) -> Optional[User]:
-        user = self.db.query(User).filter(User.login_id == login_id).first()
+        user = self.db.query(User).filter(
+            (User.login_id == login_id) | (User.email == login_id)
+        ).first()
         if not user:
             return None
         if not self.verify_password(password, user.hashed_password):

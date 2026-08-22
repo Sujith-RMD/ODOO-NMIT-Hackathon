@@ -41,7 +41,7 @@ export default function App() {
             <Route path="/notifications" element={<NotificationsPage />} />
 
             {/* Catch all */}
-            <Route path="*" element={<Navigate to="/dashboard" replace />} />
+            <Route path="*" element={<Navigate to="/employees" replace />} />
           </Route>
         </Routes>
       </BrowserRouter>
