@@ -28,6 +28,8 @@
   --color-status-on-leave: #2F80ED;
   --color-status-pending: #94A3B8;
   --color-status-error: #EB5757;
+  --color-status-late: #F97316;
+  --color-status-half-day: #A855F7;
 
   --radius-sm: 4px;
   --radius-md: 6px;

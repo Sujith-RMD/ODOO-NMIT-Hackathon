@@ -12,6 +12,7 @@ export function TopNav() {
     { name: 'Employees', href: '/employees' },
     { name: 'Attendance', href: '/attendance' },
     { name: 'Time Off', href: '/time-off' },
+    ...(user.role === 'admin' ? [{ name: 'Salary', href: '/salary' }] : []),
   ];
 
   if (!user) return null;

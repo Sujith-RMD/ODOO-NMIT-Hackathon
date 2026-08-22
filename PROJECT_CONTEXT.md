@@ -1,4 +1,4 @@
-# DAYFLOW / OdooHR — Comprehensive Project Context & Technical Blueprint
+# Dayflow — Comprehensive Project Context & Technical Blueprint
 
 > **Purpose of this document:**  
 > This context file serves as the definitive reference guide for developers, AI assistants, and team members. It details the complete architecture, codebase structure, backend APIs, frontend component hierarchy, design system specifications, mock fallback engines, and current implementation status.
@@ -7,7 +7,7 @@
 
 ## 1. Executive Summary & Core Philosophy
 
-**DAYFLOW / OdooHR** is a modern, enterprise-grade Human Resource Management System (HRMS) built for high responsiveness, quiet aesthetics, and seamless user experience.
+**Dayflow** is a modern, enterprise-grade Human Resource Management System (HRMS) built for high responsiveness, quiet aesthetics, and seamless user experience.
 
 - **Design Philosophy:** Clean, quiet, professional enterprise UI inspired by modern tools like Notion, Linear, and Odoo Internal Apps.  
   *(Strictly NO AI-slop: zero heavy gradients, zero glassmorphism/neumorphism, zero floating blobs, and zero arbitrary center-aligned layouts).*
@@ -172,29 +172,43 @@ ODOO-NMIT-Hackathon/
 ## 5. Frontend Architecture & Page Flow
 
 ### 5.1 Route Tree & Page Components
-- `/` -> Redirects automatically to `/employees`
-- `/employees` -> **`EmployeesPage`**: Displays search bar, status counters, and responsive grid of `EmployeeCard` components.
-- `/employees/:id` -> **`ProfilePage`**: Renders `ProfileHeader` (avatar, designation, status dot) + tabbed navigation (`ProfileTabs`).
-- `/profile` -> **`ProfilePage`**: Renders current user's profile view.
-- `/attendance` -> **`AttendancePage`**: Stat cards (Present, Absent, Work Hours, Leave) + structured log table.
-- `/time-off` -> **`TimeOffPage`**: Color-coded balance cards + request submission & history table.
+- `/` → **`LoginPage`**: Authentication entry point.
+- `/login` → Redirects to `/`.
+- `/dashboard` → **`DashboardPage`**: Admin/employee dashboard (protected).
+- `/employees` → **`EmployeesPage`**: Displays search bar, status counters, and responsive grid of `EmployeeCard` components (protected).
+- `/employees/new` → **`AddEmployeePage`**: Multi-step employee creation wizard (protected, admin).
+- `/employees/:id` → **`ProfilePage`**: Renders `ProfileHeader` (avatar, designation, status dot) + tabbed navigation (`ProfileTabs`) (protected).
+- `/profile` → **`ProfilePage`**: Renders current user's profile view (protected).
+- `/attendance` → **`AttendancePage`**: Stat cards (Present, Absent, Work Hours, Leave) + structured log table (protected).
+- `/time-off` → **`TimeOffPage`**: Color-coded balance cards + request submission & history table (protected).
+- `/salary` → **`SalaryPage`**: Employee-list sidebar + salary structure detail panel with live net pay calculation (protected, admin).
+- `/notifications` → **`NotificationsPage`**: User notification feed (protected).
+- `*` → Redirects to `/dashboard`.
 
-*Note on Authentication Pages:* The `SignInPage` and `SignUpPage` files were removed from our branch per team domain separation (another team member is owning auth page UI). `AppShell.tsx` currently bypasses unauthenticated redirects to enable seamless local development of internal pages.
+*Authentication:* All routes except `/` and `/login` are wrapped in `RequireAuth`. The `AppShell` layout (with `TopNav`) renders as the parent route for all protected pages.
 
 ### 5.2 Top Navigation & Global Check-In/Out (`TopNav.tsx` & `CheckInOutControl.tsx`)
 - The top header (`TopNav.tsx`) includes:
-  - App Logo & Title ("OdooHR")
-  - Navigation Links (`Employees`, `Attendance`, `Time Off`)
+  - App Logo & Title ("Dayflow")
+  - Navigation Links: `Employees`, `Attendance`, `Time Off`, and `Salary` (admin-only)
   - Real-time Check-In / Check-Out Widget (`CheckInOutControl.tsx`)
   - User Avatar & Quick Menu (`AvatarMenu.tsx`)
 
 ### 5.3 Live Frontend Salary Calculation Engine
 To achieve instant feedback when adjusting employee wages (without lag), the frontend includes a client-side computation engine in `useSalaryCalculation.ts` and `salaryService.ts`:
-- **Basic Pay Calculation:** Computed as a percentage of Monthly Wage (default 50%).
-- **HRA (House Rent Allowance):** Computed as a percentage of Basic Pay (default 50% of Basic).
-- **Standard Allowances:** Computed dynamically.
-- **PF (Provident Fund):** 12% deduction on Basic Pay.
-- **Professional Tax:** Dynamic tiered deduction based on income brackets.
+
+**Earnings:**
+- **Basic Salary:** 50% of Monthly Wage.
+- **HRA (House Rent Allowance):** 50% of Basic.
+- **Standard Allowance:** Fixed ₹4,167/month.
+- **Performance Bonus:** 8.33% of Basic.
+- **Leave Travel Allowance (LTA):** 8.33% of Basic.
+- **Fixed Allowance:** Wage − sum of all other earning components (balancing remainder).
+
+**Deductions:**
+- **PF (Employee Contribution):** 12% of Basic (deducted from gross).
+- **PF (Employer Contribution):** 12% of Basic (shown for info, not deducted from employee gross).
+- **Professional Tax:** Flat ₹200/month.
 
 ---
 
@@ -204,21 +218,26 @@ All design tokens are defined in `frontend/src/index.css` via Tailwind CSS v4 `@
 
 ```css
 @theme {
-  --color-background: #FAFAFA;
+  --color-background: #F7FAFC;
   --color-foreground: #1A1A1A;
   --color-card: #FFFFFF;
   --color-card-foreground: #1A1A1A;
-  --color-primary: #4F46E5;       /* Deep Indigo - Primary Accent */
+  --color-primary: #2F80ED;           /* Dayflow Blue */
   --color-primary-foreground: #FFFFFF;
   --color-secondary: #F3F4F6;
   --color-muted-foreground: #6B7280;
+  --color-destructive: #EB5757;
   --color-border: #E5E7EB;
   --color-input: #E5E7EB;
-  --color-ring: #4F46E5;
+  --color-ring: #2F80ED;
 
-  --color-status-present: #22C55E;  /* Green dot */
-  --color-status-absent: #EAB308;   /* Amber dot */
-  --color-status-on-leave: #0EA5E9; /* Blue dot */
+  --color-status-present: #27AE60;    /* Green */
+  --color-status-absent: #F2C94C;     /* Yellow */
+  --color-status-on-leave: #2F80ED;   /* Blue */
+  --color-status-pending: #94A3B8;    /* Slate */
+  --color-status-error: #EB5757;      /* Red */
+  --color-status-late: #F97316;       /* Orange */
+  --color-status-half-day: #A855F7;   /* Purple */
 
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
 }
